@@ -10,11 +10,10 @@ exports.protect=asyncHandler(async(req,res,next)=>{
 
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
         token = req.headers.authorization.split(' ')[1]
-        console.log(token)
+        
         
     }
 
-    console.log(token)
     // else if(req.cookies.token){
     //    token=req.cookies.token
     // }
@@ -33,3 +32,15 @@ exports.protect=asyncHandler(async(req,res,next)=>{
          return next(new errorResponse('Not Authorize to access  this route ', 401))
     }
 })
+
+exports.authorize=(...roles)=>{
+    
+    return (req,res,next)=>{
+       
+        if(!roles.includes(req.user.role)){
+            return next(new errorResponse(`${req.user.role} not allow to perform this task`, 401))
+        }
+        next()
+    }
+     
+}

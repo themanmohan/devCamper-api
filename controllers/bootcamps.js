@@ -33,6 +33,19 @@ exports.getBootcamp = asyncHandler(async(req, res, next) => {
 //@route     POST/api/v1/bootcapms
 //@access    private
 exports.createBootcamp = asyncHandler(async(req, res, next) => {
+
+    //adding user to req
+    req.body.user=req.user.id
+
+    //checking for published bootcamp
+
+    const publishedBootcamp=await Bootcamp.findOne({user:req.user.id})
+     
+     // if the user is not  admin they can only add one bootcamp
+     if(publishedBootcamp &&  req.user.role!=='admin'){
+         return next(new errorResponse(`The User With Id ${req.user.id} has already published`,404))
+     }
+
     
      const bootcamp = await Bootcamp.create(req.body)
      res.status(201).json({
@@ -48,15 +61,23 @@ exports.createBootcamp = asyncHandler(async(req, res, next) => {
 //@route     Put/api/v1/bootcapms/:id
 //@access    private
 exports.updateBootcamp = asyncHandler(async(req, res, next) => {
-        const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true,
-            useFindAndModify:false
-        })
+        let bootcamp = await Bootcamp.findById(req.params.id)
 
         if (!bootcamp) {
           return next(new errorResponse(`Bootcamp not found with id ${req.params.id}`, 404))
         }
+    
+        //make sure onluy owner  update
+        if(bootcamp.user.toString()!==req.user.id && req.user.role!=='admin'){
+            
+            return next(new errorResponse(`User with id ${req.params.id} not authorie to update`, 401))
+        }
+
+        bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body,{
+            new:true,
+            runValidators:true,
+            useFindAndModify: false
+        })
         res.status(200).json({
             success: true,
             data: bootcamp
@@ -73,6 +94,11 @@ exports.deleteBootcamp=asyncHandler(async(req,res,next)=>{
     if(!bootcamp){
         return next(new errorResponse('Bootcamp not found '))
     }
+
+     if(bootcamp.user.toString()!==req.user.id && req.user.role!=='admin'){
+            return next(new errorResponse(`User with id ${req.params.id} not authorie to update`, 401))
+        }
+
     bootcamp.remove()
     res.status(200).json({success:true,data:{}})
 })
@@ -115,6 +141,13 @@ exports.uploadPhotoBootcamp = asyncHandler(async (req, res, next) => {
     if (!bootcamp) {
         return next(new errorResponse('Bootcamp not found ',404))
     }
+
+    //make sure ownership
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(new errorResponse(`User with id ${req.params.id} not authorie to update`, 401))
+    }
+
+
     if(!req.files){
         return next(new errorResponse(' please upload file ',500))
     }
