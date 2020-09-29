@@ -21,8 +21,8 @@ app.use(cookieparser())
 
 const bootcampRouter = require("./routes/bootcamps");
 const courseRouter = require("./routes/Courses");
-const userRouter=require('./routes/auth')
-
+const authRouter=require('./routes/auth')
+const userRouter=require('./routes/users')
 const port=process.env.PORT ||  5000
 
 if (process.env.NODE_ENV === "development"){
@@ -38,7 +38,9 @@ app.use(fileupload())
 //mounting rutes
 app.use('/api/v1/bootcamps', bootcampRouter)
 app.use('/api/v1/courses', courseRouter)
-app.use('/api/v1/auth',userRouter)
+app.use('/api/v1/auth',authRouter)
+app.use('/api/v1/user', userRouter)
+
 
 
 //custom errorhandler

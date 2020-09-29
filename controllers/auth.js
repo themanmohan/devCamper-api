@@ -1,6 +1,8 @@
 const User = require('../model/user')
 const asyncHandler = require('../middleware/async')
 const errorResponse = require('../utils/errorResponse')
+const sendEmail=require('../utils/sendEmail')
+const crypto=require('crypto')
 
 
 
@@ -52,6 +54,118 @@ exports.getMe=asyncHandler(async(req,res,next)=>{
 })
 
 
+//@desc      forget password
+//@route     post/api/v1/auth/forgetpassword
+//@access    public
+exports.forgetPassword = asyncHandler(async (req, res, next) => {
+    const user = await User.findOne({email:req.body.email})
+    if(!user){
+         return next(new errorResponse('email not founs', 404))
+    }
+
+    //get restepassord token
+
+    const getrestToken=user.getPasswordRestToken()
+
+    await user.save({validateBeforeSave:false})
+
+    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/auth/resetpassword/${getrestToken}`;
+    const message =' you are getting this message because of you are requesting for the reset password '+resetURL
+     
+    try{
+       sendEmail({
+           email:user.email,
+           subject:'Password reset',
+           message
+       })
+       res.status(200).json({success:true,data:'email send'})
+    }catch(err){
+
+        console.log(err)
+        user.resetPasswordToken=undefined
+        user.resetPasswordExpire = undefined
+
+        await user.save({validateBeforeSave:false})
+
+        return next(new errorResponse('email could not send',500))
+
+    }
+    
+    res.status(200).json({
+        success: true,
+        data: user
+    })
+})
+
+
+exports.resetPassword=asyncHandler(async(req,res,next)=>{
+
+    //get hashed token
+    const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.resetToken)
+    .digest('hex')
+
+
+    const user =await User.findOne({
+        resetPasswordToken,
+        
+    })
+    
+    if(!user){
+         return next(new errorResponse('user could not found',404))
+    }
+    user.password=req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire=undefined
+
+    await user.save()
+
+    sendTokenResponse(user, 200, res);
+})
+
+
+
+//@desc      update user detail
+//@route     update/api/v1/auth/updateDetails
+//@access    private
+exports.updateDetails = asyncHandler(async (req, res, next) => {
+    const fieltoupdate={
+        name:req.body.name,
+        email:req.body.email
+        
+    }
+
+  const user = await User.findByIdAndUpdate(req.user.id,fieltoupdate,{
+      new:true,
+      runValidators:true
+  });
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
+
+//@desc      update user password
+//@route     update/api/v1/auth/updatePassword
+//@access    private
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user.id).select('+password');
+   
+    //checking current password
+    if(!(await user.matchPassword(req.body.currentPassword))){
+        return next (new errorResponse(`password is  incorrect`,401))
+
+    }
+
+    user.password = req.body.newPassword
+    await user.save()
+
+    sendTokenResponse(user, 200, res);
+});
+
+
 
 //get token from model  nad create a cookie and send response
 const  sendTokenResponse=(user,statusCode ,res)=>{
@@ -78,3 +192,6 @@ const  sendTokenResponse=(user,statusCode ,res)=>{
 
         
 }
+
+
+

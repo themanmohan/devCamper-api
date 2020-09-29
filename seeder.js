@@ -34,7 +34,7 @@ const user = JSON.parse(fs.readFileSync(`${__dirname}/_data/users.json`, 'utf-8'
  const insertcourse = async () => {
      try {
          await Course.create(courses)
-          await User.create(user)
+        //   await User.create(user)
          console.log('Data Imported.....'.green.inverse)
          process.exit()
      } catch (erro) {
