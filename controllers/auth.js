@@ -38,12 +38,31 @@ exports.login=asyncHandler(async(req,res,next)=>{
   }
 
   const ismatch=await user.matchPassword(password)
-console.log(ismatch)
+
   if(!ismatch){
        return next(new errorResponse('invalid credientials',401))
   }
     sendTokenResponse(user,200,res)
 })
+
+
+//@desc      logout user
+//@route     get/api/v1/auth/logout
+//@access    public
+// @desc      Log user out / clear cookie
+// @route     GET /api/v1/auth/logout
+// @access    Private
+exports.logout = asyncHandler(async (req, res, next) => {
+    res.cookie('token', 'none', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    });
+
+    res.status(200).json({
+        success: true,
+        data: {}
+    });
+});
 
 exports.getMe=asyncHandler(async(req,res,next)=>{
     const user =await User.findById(req.user.id)
@@ -52,6 +71,7 @@ exports.getMe=asyncHandler(async(req,res,next)=>{
         data:user
     })
 })
+
 
 
 //@desc      forget password
@@ -131,8 +151,7 @@ exports.resetPassword=asyncHandler(async(req,res,next)=>{
 //@access    private
 exports.updateDetails = asyncHandler(async (req, res, next) => {
     const fieltoupdate={
-        name:req.body.name,
-        email:req.body.email
+        role:req.body.role
         
     }
 

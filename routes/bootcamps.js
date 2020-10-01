@@ -20,8 +20,12 @@ const advancedresult=require('../middleware/advancedResult')
 //resource router 
 
 const courseRouter=require('./Courses')
+const reviewRouter = require('./review')
+
 
 router.use('/:bootcampsId/courses',courseRouter)
+router.use('/:bootcampsId/review', reviewRouter)
+
 router.route('/:id/photo').put(protect,authorize('publisher','admin'),uploadPhotoBootcamp)
 
 router.route('/radius/:zipcode/:distance').get(getBootcompInRaduis)

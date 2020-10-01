@@ -2,10 +2,12 @@ const fs =require('fs')
 const Bootcamp=require('./model/bootcamp')
 const  Course=require('./model/Course')
 const User = require('./model/user')
+const Review = require('./model/review')
 
 const dotenv=require('dotenv')
 const  color=require('colors')
 const mongoose = require('mongoose')
+
 ///laoding env var
 dotenv.config({path:'config/config.env'})
 
@@ -20,6 +22,8 @@ dotenv.config({path:'config/config.env'})
  const bootcamp=JSON.parse(fs.readFileSync(`${__dirname}/_data/bootcamps.json`,'utf-8'))
  const courses = JSON.parse(fs.readFileSync(`${__dirname}/_data/courses.json`, 'utf-8'))
 const user = JSON.parse(fs.readFileSync(`${__dirname}/_data/users.json`, 'utf-8'))
+ const review = JSON.parse(fs.readFileSync(`${__dirname}/_data/reviews.json`, 'utf-8'))
+
  //immport data
   const insertdata=async()=>{
       try{
@@ -30,6 +34,29 @@ const user = JSON.parse(fs.readFileSync(`${__dirname}/_data/users.json`, 'utf-8'
            console.log(erro)
       }
  }
+
+  const insertreview = async () => {
+      try {
+          await Review.create(review)
+          console.log('Data Imported.....'.green.inverse)
+          process.exit()
+      } catch (erro) {
+          console.log(erro)
+      }
+  }
+
+
+  //delete data
+  const deletereview = async () => {
+      try {
+          await Review.deleteMany()
+
+          console.log('Data deleted.....'.red.inverse)
+          process.exit()
+      } catch (erro) {
+          console.log(erro)
+      }
+  }
 
  const insertcourse = async () => {
      try {
@@ -71,6 +98,12 @@ const user = JSON.parse(fs.readFileSync(`${__dirname}/_data/users.json`, 'utf-8'
   }else if(process.argv[2]=='-d'){
       deleteData()
   }
+
+   if (process.argv[2] == '-ri') {
+       insertreview()
+   } else if (process.argv[2] == '-d') {
+       deletereview()
+   }
 
   if (process.argv[2] == '-ci') {
       insertcourse()

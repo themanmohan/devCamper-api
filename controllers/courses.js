@@ -10,7 +10,7 @@ const Course = require('../model/Course')
 //@access    public
 
 exports.getCourse=asyncHandler(async(req,res,next)=>{
-    let query;
+   
 
     if(req.params.bootcampsId){
         const courses=await Courses.find({bootcamp:req.params.bootcampsId})

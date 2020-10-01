@@ -67,7 +67,7 @@ const BootcampSchema= new mongoose.Schema({
                'other'
            ]
        },
-       averageRatig:{
+       averageRating: {
            type:Number,
            min:[1,'Rating  must latleast 1 '],
            max:[10,'Rating cnnot be be more than 10']
