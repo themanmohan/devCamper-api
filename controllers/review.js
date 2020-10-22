@@ -77,30 +77,7 @@ exports.createReview = asyncHandler(async (req, res, next) => {
 
 })
 
-//@desc      create review for bootcamp
-//@route     post/api/v1/review
-//@route     post/api/v1/bootcamp/:bootcampId/review
-//@access    private
 
-exports.createReview = asyncHandler(async (req, res, next) => {
-    req.body.bootcamp = req.params.bootcampsId
-    req.body.user = req.user.id
-
-    const bootcamp = await Bootcamp.findById(req.params.bootcampsId)
-
-    if (!bootcamp) {
-        return next(new errorResponse('bootcamp not found', 404))
-    }
-
-    const review = await Review.create(req.body)
-
-    return res.status(201).json({
-        success: true,
-        count: review.length,
-        data: review
-    })
-
-})
 
 
 
