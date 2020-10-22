@@ -3,3 +3,8 @@ node_modules/
 config/config.env
 
 notes.js
+
+_data
+
+seeder.js
+
