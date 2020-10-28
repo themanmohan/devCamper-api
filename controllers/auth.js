@@ -78,46 +78,46 @@ exports.getMe=asyncHandler(async(req,res,next)=>{
 
 
 
-// //@desc      forget password
-// //@route     post/api/v1/auth/forgetpassword
-// //@access    public
-// exports.forgetPassword = asyncHandler(async (req, res, next) => {
-//     const user = await User.findOne({email:req.body.email})
-//     if(!user){
-//          return next(new errorResponse('email not founs', 404))
-//     }
+//@desc      forget password
+//@route     post/api/v1/auth/forgetpassword
+//@access    public
+exports.forgetPassword = asyncHandler(async (req, res, next) => {
+    const user = await User.findOne({email:req.body.email})
+    if(!user){
+         return next(new errorResponse('email not founs', 404))
+    }
 
-//     //get restepassord token
+    //get restepassord token
 
-//     const getrestToken=user.getPasswordRestToken()
+    const getrestToken=user.getPasswordRestToken()
 
-//     await user.save({validateBeforeSave:false})
-//     const resetURL = `${req.protocol}://${req.get("host")}/api/v1/auth/resetpassword/${getrestToken}`;
-//     const message =' you are getting this message because of you are requesting for the reset password '+resetURL
-//     try{
-//        sendEmail({
-//            email:user.email,
-//            subject:'Password reset',
-//            message
-//        })
-//        res.status(200).json({success:true,data:'email send'})
-//     }catch(err){
+    await user.save({validateBeforeSave:false})
+    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/auth/resetpassword/${getrestToken}`;
+    const message =' you are getting this message because of you are requesting for the reset password '+resetURL
+    try{
+       sendEmail({
+           email:user.email,
+           subject:'Password reset',
+           message
+       })
+       res.status(200).json({success:true,data:'email send'})
+    }catch(err){
 
-//         console.log(err)
-//         user.resetPasswordToken=undefined
-//         user.resetPasswordExpire = undefined
+        console.log(err)
+        user.resetPasswordToken=undefined
+        user.resetPasswordExpire = undefined
 
-//         await user.save({validateBeforeSave:false})
+        await user.save({validateBeforeSave:false})
 
-//         return next(new errorResponse('email could not send',500))
+        return next(new errorResponse('email could not send',500))
 
-//     }
+    }
     
-//     res.status(200).json({
-//         success: true,
-//         data: user
-//     })
-// })
+    res.status(200).json({
+        success: true,
+        data: user
+    })
+})
 
 
 exports.resetPassword=asyncHandler(async(req,res,next)=>{
