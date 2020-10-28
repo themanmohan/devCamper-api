@@ -11,7 +11,7 @@ const errorHandler=(err,req,res,next)=>{
         const message = `Resources not found with id ${err.value}`
         error=new ErrorResponse(message,404)
     }
-    //duplicate key 
+    //duplicate key a
     if (err.code  === 11000) {
         const message = `Duplicate entry  found`
         error = new ErrorResponse(message, 400)
